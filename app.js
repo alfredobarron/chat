@@ -12,8 +12,9 @@ app.use(express.static(__dirname + '/'));
 
 app.get('/', function(req, res){
   //res.send('hello world');
-  res.sendfile(__dirname + '/index.html');
+  //res.sendfile(__dirname + '/index.html');
   //res.sendfile('http://chat-alfredo.herokuapp.com/');
+  res.sendfile(__dirname + '/index.html');
 });
 
 
