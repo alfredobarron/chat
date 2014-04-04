@@ -1,10 +1,28 @@
 {
   "name": "chat",
-  "description": "chat nodejs socketio express",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.0.0",
+  "description": "chat nodejs, express, socketio",
+  "main": "app.js",
   "dependencies": {
-  	"express": "3.x",
-    "socket.io": "0.9.16"
-  }
+    "express": "~3.5.1",
+    "socket.io": "~0.9.16"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alfredobarron/chat.git"
+  },
+  "keywords": [
+    "chat",
+    "alfredo"
+  ],
+  "author": "Alfredo Barron",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alfredobarron/chat/issues"
+  },
+  "homepage": "https://github.com/alfredobarron/chat"
 }
