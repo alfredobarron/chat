@@ -25,8 +25,7 @@
 						<span class="glyphicon glyphicon-user"></span>
 						<span class="badge" id="count"></span>
 					</button>
-						<ul class="dropdown-menu">
-					</ul>
+					<ul class="dropdown-menu" id="#nicknames"></ul>
 				</div>
 			</h3>
 			</div>
@@ -50,7 +49,7 @@
 				<div class="input-group">
 					<input type="text" class="form-control input-lg" id="mensaje" placeholder="Escribe un mensaje">
 						<span class="input-group-btn">
-							<button class="btn btn-default input-lg" id="btn-mensaje"><span class="glyphicon glyphicon-send"></span></button>
+							<button class="btn btn-primary input-lg" id="btn-mensaje"><span class="glyphicon glyphicon-send"></span></button>
 						</span>
 				</div><!-- /input-group -->
 			</form>
@@ -65,19 +64,21 @@
 			$('#btn-nickname').click(function(e){
 				e.preventDefault();
 				var btn = $(this);
-				btn.button('loading');
-				socket.emit('nickname', $('#nickname').val(), function(data){
-					if(data){
-						$('#form-nickname').addClass('hidden');
-						$('#btn-users').removeClass('hidden');
-						$('#mensajes').removeClass('hidden');
-						$('#form-mensaje').removeClass('hidden');
-						$('#form-mensaje #mensaje').focus();
-					}else{
-						$('#form-nickname').append('este nickname ya esta ocupado');
-					}
-					btn.button('reset');
-				});
+				if($('#nickname').val()!==''){
+					btn.button('loading');
+					socket.emit('nickname', $('#nickname').val(), function(data){
+						if(data){
+							$('#form-nickname').addClass('hidden');
+							$('#btn-users').removeClass('hidden');
+							$('#mensajes').removeClass('hidden');
+							$('#form-mensaje').removeClass('hidden');
+							$('#form-mensaje #mensaje').focus();
+						}else{
+							$('#form-nickname .container').append('<div class="alert alert-warning">El nickname ya esta en uso</div>');
+						}
+						btn.button('reset');
+					});
+				}
 			});
 
 			$('#btn-mensaje').click(function(e){
@@ -91,7 +92,7 @@
 			socket.on('nicknames',function(data){
 				$('#nicknames').empty();
 				$.each(data, function(k,v){
-					$('.dropdown-menu').append('<li><a href="#">' + v + '</a></li>');
+					$('#nicknames').append('<li><a href="#">' + v + '</a></li>');
 				});
 				$('#count').html(data.length);
 			});

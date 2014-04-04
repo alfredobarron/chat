@@ -24,7 +24,7 @@ footer{
 }
 
 section #form-nickname{
-	margin-top: 50%;
+	margin-top: 40%;
 }
 input, button, .dropdown-menu{
 	border-radius: 0 !important;
@@ -49,5 +49,5 @@ input, button, .dropdown-menu{
 	font-size: 16px
 }
 .input-group-btn .btn{
-	padding: 6px 40px;
+	padding: 6px 20px;
 }
