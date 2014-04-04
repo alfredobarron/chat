@@ -1,0 +1,44 @@
+body, html {
+  height: 100%;
+}
+
+header{
+	position: absolute;
+	top: 0;
+	width: 100%;
+	background: #000;
+	color: #fff;
+}
+section {
+  height: 100%;
+  padding-top:70px;
+  padding-bottom: 45px;
+}
+footer{
+	position: absolute;
+	bottom: 0;
+}
+
+section #form-nickname{
+	margin-top: 10%;
+}
+input, button, a, .dropdown-menu{
+	border-radius: 0 !important;
+	border-width: 2px !important;
+}
+#mensajes{
+	height: 100%;
+	overflow: auto;
+	padding: 0 10px;
+}
+#mensajes div{
+	border-top: 1px solid #eee;
+	padding: 0 20px;
+}
+#mensajes div p{
+	margin: 0;
+	padding: 0;
+}
+.input-group-btn .btn{
+	padding: 6px 40px;
+}

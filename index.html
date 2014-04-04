@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Chat</title>
+		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="/styles.css">
+	</head>
+	<body>
+
+		<header>
+			<div class="container">
+			<h1>
+				<span class="glyphicon glyphicon-comment"></span> Chate@
+				<div class="btn-group pull-right hidden" id="btn-users">
+					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+						<span class="glyphicon glyphicon-user"></span>
+						<span class="badge" id="count"></span>
+					</button>
+						<ul class="dropdown-menu">
+					</ul>
+				</div>
+			</h1>
+			</div>
+		</header>
+
+		<section>
+			<form id="form-nickname">
+			<div class="container">
+				<div class="form-group">
+					<input type="text" class="form-control input-lg" id="nickname" placeholder="Nickname" autofocus>
+				</div>
+				<button class="btn btn-primary btn-lg btn-block" id="btn-nickname">Entrar</button>
+			</div>
+			</form>
+
+			<div class="hidden" id="mensajes"></div>
+		</section>
+
+		<footer>
+			<form class="hidden" id="form-mensaje">
+				<div class="input-group">
+					<input type="text" class="form-control input-lg" id="mensaje" placeholder="Escribe un mensaje">
+						<span class="input-group-btn">
+							<button class="btn btn-default input-lg" id="btn-mensaje"><span class="glyphicon glyphicon-send"></span></button>
+						</span>
+				</div><!-- /input-group -->
+			</form>
+		</footer>
+
+		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			var socket = io.connect();
+
+			$('#btn-nickname').click(function(e){
+				e.preventDefault();
+				socket.emit('nickname', $('#nickname').val(), function(data){
+					if(data){
+						$('#form-nickname').addClass('hidden');
+						$('#btn-users').removeClass('hidden');
+						$('#mensajes').removeClass('hidden');
+						$('#form-mensaje').removeClass('hidden');
+						$('#form-mensaje #mensaje').focus();
+					}else{
+						$('#form-nickname').append('este nickname ya esta ocupado');
+					}
+				});
+			});
+
+			$('#btn-mensaje').click(function(e){
+				e.preventDefault();
+				socket.emit('user mensaje', $('#mensaje').val());
+				$('#mensaje').val('').focus();
+				$('#mensajes').animate({scrollTop: $( "p:last" ).offset().top - 0}, 800);
+			});
+
+			socket.on('nicknames',function(data){
+				$('#nicknames').empty();
+				$.each(data, function(k,v){
+					$('.dropdown-menu').append('<li><a href="#">' + v + '</a></li>');
+				});
+				$('#count').html(data.length);
+			});
+
+			socket.on('user mensaje',function(data){
+				$('#mensajes').append('<div><small class="text-muted">' + data.nick + '</small><p>' + data.message + '</p></div>');
+			});
+
+		</script>
+	</body>
+</html>
