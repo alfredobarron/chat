@@ -16,11 +16,12 @@
 	</head>
 	<body>
 
-		<header>
+		<header class="hidden">
 			<div class="container">
 			<h3>
 				<span class="glyphicon glyphicon-comment"></span>
-				<div class="btn-group pull-right hidden" id="btn-users">
+
+				<div class="btn-group pull-right">
 					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
 						<span class="glyphicon glyphicon-user"></span>
 						<span class="badge" id="count"></span>
@@ -34,6 +35,7 @@
 		<section>
 			<form id="form-nickname">
 			<div class="container">
+				<h1 class="text-center"><span class="glyphicon glyphicon-comment"></span></h1>
 				<div class="form-group">
 					<input type="text" class="form-control input-lg" id="nickname" placeholder="Nickname" autofocus>
 				</div>
@@ -69,9 +71,7 @@
 					socket.emit('nickname', $('#nickname').val(), function(data){
 						if(data){
 							$('#form-nickname').addClass('hidden');
-							$('#btn-users').removeClass('hidden');
-							$('#mensajes').removeClass('hidden');
-							$('#form-mensaje').removeClass('hidden');
+							$('header, #mensajes, #form-mensaje').removeClass('hidden');
 							$('#form-mensaje #mensaje').focus();
 						}else{
 							$('#form-nickname .container').append('<div class="alert alert-warning">El nickname ya esta en uso</div>');
@@ -86,7 +86,6 @@
 				socket.emit('user mensaje', $('#mensaje').val());
 				$('#mensaje').val('').focus();
 				//$('#mensajes').animate({scrollTop: $( "p:last" ).offset().top - 0}, 800);
-
 			});
 
 			socket.on('nicknames',function(data){

@@ -24,7 +24,10 @@ footer{
 }
 
 section #form-nickname{
-	margin-top: 40%;
+	margin-top: 10%;
+}
+section #form-nickname h1{
+	font-size: 10em
 }
 input, button, .dropdown-menu{
 	border-radius: 0 !important;
