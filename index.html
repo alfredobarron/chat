@@ -84,7 +84,8 @@
 				e.preventDefault();
 				socket.emit('user mensaje', $('#mensaje').val());
 				$('#mensaje').val('').focus();
-				$('#mensajes').animate({scrollTop: $( "p:last" ).offset().top - 0}, 800);
+				//$('#mensajes').animate({scrollTop: $( "p:last" ).offset().top - 0}, 800);
+				$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
 			});
 
 			socket.on('nicknames',function(data){

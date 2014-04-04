@@ -29,11 +29,11 @@ input, button, a, .dropdown-menu{
 #mensajes{
 	height: 100%;
 	overflow: auto;
-	padding: 0 10px;
+	padding: 2px 2px;
 }
 #mensajes div{
 	border-top: 1px solid #eee;
-	padding: 0 20px;
+	padding: 1px 10px;
 }
 #mensajes div p{
 	margin: 0;
