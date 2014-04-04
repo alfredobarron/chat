@@ -53,6 +53,7 @@ io.sockets.on('connection', function (socket) {
 
     if(!socket.nickname) return;
     nicknames.splice(nicknames.indexOf(socket.nickname), 1);
+    socket.broadcast.emit('nicknames', nicknames);
 
   });
 
