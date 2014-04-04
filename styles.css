@@ -9,9 +9,13 @@ header{
 	background: #000;
 	color: #fff;
 }
+header h3{
+	margin-top: 13px;
+	margin-bottom: 13px;
+}
 section {
   height: 100%;
-  padding-top:70px;
+  padding-top:55px;
   padding-bottom: 45px;
 }
 footer{
@@ -20,11 +24,15 @@ footer{
 }
 
 section #form-nickname{
-	margin-top: 10%;
+	margin-top: 50%;
 }
-input, button, a, .dropdown-menu{
+input, button, .dropdown-menu{
 	border-radius: 0 !important;
 	border-width: 2px !important;
+}
+.dropdown-toggle{
+	border-radius: 0 !important;
+	border-width: 0 !important;
 }
 #mensajes{
 	height: 100%;
@@ -38,6 +46,7 @@ input, button, a, .dropdown-menu{
 #mensajes div p{
 	margin: 0;
 	padding: 0;
+	font-size: 16px
 }
 .input-group-btn .btn{
 	padding: 6px 40px;
