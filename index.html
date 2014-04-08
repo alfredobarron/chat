@@ -19,7 +19,7 @@
 		<header class="hidden">
 			<div class="container">
 			<h3>
-				<span class="glyphicon glyphicon-comment"></span>
+				<a href="#"><span class="glyphicon glyphicon-comment"></span></a>
 
 				<div class="btn-group pull-right">
 					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -96,10 +96,29 @@
 				$('#count').html(data.length);
 			});
 
-			socket.on('user mensaje',function(data){
-				$('#mensajes').append('<div><small class="text-muted">' + data.nick + '</small><p>' + data.message + '</p></div>');
+			socket.on('historial',function(data){
+				$.each(data,function(k,v){
+					$('#mensajes').append('<div><small class="text-muted"><b>' + v.nick + ' </b> - <em> ' + v.fecha + '</em></small><p>' + v.message + '</p></div>');
+				});
 				$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
 			});
+
+			socket.on('user mensaje',function(data){
+				$('#mensajes').append('<div><small class="text-muted"><b>' + data.nick + '</b> - <em> ' + today + '</em></small><p>' + data.message + '</p></div>');
+				$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
+			});
+
+			var today = new Date();
+			var dd = today.getDate();
+			var mm = today.getMonth(); //January is 0!
+			var h = today.getHours();
+			var min =today.getMinutes();
+
+			var yyyy = today.getFullYear();
+			//if(dd<10){dd='0'+dd;}
+			//if(mm<10){mm='0'+mm}
+			var monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+			var today = dd+'.'+monthNames[mm]+'.'+yyyy+' '+h+':'+min;
 
 		</script>
 	</body>

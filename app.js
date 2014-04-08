@@ -1,25 +1,63 @@
 //Conexion
 var port = Number(process.env.PORT || 5000);
 var express = require('express');
+var mongoose = require('mongoose');
 var app = express(),
   http = require('http'),
   server = http.createServer(app),
   io = require('socket.io').listen(server);
 
+
+//Express
 server.listen(port);
 
 app.use(express.static(__dirname + '/'));
 
 app.get('/', function(req, res){
   //res.send('hello world');
-  //res.sendfile(__dirname + '/index.html');
-  //res.sendfile('http://chat-alfredo.herokuapp.com/');
   res.sendfile(__dirname + '/index.html');
 });
 
 
-var nicknames = [];
+//Mongoose
+mongoose.connect('mongodb://localhost/chat');
 
+var db = mongoose.connection;
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function callback () {
+  // yay!
+});
+
+// Mongoose Schema definition
+var Schema = mongoose.Schema;
+var mensajesdb = new Schema({
+    nick: String,
+    message: String,
+    fecha: String
+});
+// Mongoose Model definition
+var Mensaje = mongoose.model('mensajes', mensajesdb);
+
+
+
+var nicknames = [];
+var historial = [];
+
+var today = new Date();
+var dd = today.getDate();
+var mm = today.getMonth(); //January is 0!
+var h = today.getHours();
+var min =today.getMinutes();
+
+var yyyy = today.getFullYear();
+//if(dd<10){dd='0'+dd;}
+//if(mm<10){mm='0'+mm}
+var monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+var today = dd+'.'+monthNames[mm]+'.'+yyyy+' '+h+':'+min;
+
+
+
+//Socketio
 //Cuando entran a la app
 io.sockets.on('connection', function (socket) {
 
@@ -33,6 +71,10 @@ io.sockets.on('connection', function (socket) {
       nicknames.push(data);
       socket.nickname = data;
       io.sockets.emit('nicknames', nicknames);
+      Mensaje.find({}, function (err, docs) {
+        historial=docs;
+        io.sockets.emit('historial', historial);
+      });
 
     }
 
@@ -45,7 +87,17 @@ io.sockets.on('connection', function (socket) {
       nick: socket.nickname,
       message: data
     });
-
+    //create new model
+    var mensajes = new Mensaje({nick: socket.nickname, message: data, fecha: today});
+    //save model to MongoDB
+    mensajes.save(function (err) {
+      if (err) {
+        return err;
+      }
+      else {
+        console.log("Post saved");
+      }
+    });
   });
 
   //Cuando salen de la app

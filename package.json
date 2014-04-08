@@ -5,10 +5,12 @@
   "main": "app.js",
   "dependencies": {
     "express": "~3.5.1",
-    "socket.io": "~0.9.16"
+    "socket.io": "~0.9.16",
+    "mongoose": "*"
   },
   "devDependencies": {},
   "scripts": {
+    "start": "node app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
