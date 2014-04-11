@@ -19,6 +19,7 @@ app.get('/', function(req, res){
 });
 
 
+
 //Mongoose
 mongoose.connect('mongodb://localhost/chat');
 
@@ -27,12 +28,12 @@ db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function callback () {
   // yay!
 });
-
 // Mongoose Schema definition
 var Schema = mongoose.Schema;
 var mensajesdb = new Schema({
-    nick: String,
-    message: String,
+    to: String,
+    from: String,
+    msj: String,
     fecha: String
 });
 // Mongoose Model definition
@@ -40,20 +41,9 @@ var Mensaje = mongoose.model('mensajes', mensajesdb);
 
 
 
+//Variables
 var nicknames = [];
 var historial = [];
-
-var today = new Date();
-var dd = today.getDate();
-var mm = today.getMonth(); //January is 0!
-var h = today.getHours();
-var min =today.getMinutes();
-
-var yyyy = today.getFullYear();
-//if(dd<10){dd='0'+dd;}
-//if(mm<10){mm='0'+mm}
-var monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-var today = dd+'.'+monthNames[mm]+'.'+yyyy+' '+h+':'+min;
 
 
 
@@ -61,52 +51,100 @@ var today = dd+'.'+monthNames[mm]+'.'+yyyy+' '+h+':'+min;
 //Cuando entran a la app
 io.sockets.on('connection', function (socket) {
 
-  //Cuando entra un usuario
+  //Cuando entra un usuario a la app
   socket.on('nickname', function(data, callback) {
-
     if(nicknames.indexOf(data) != -1){
       callback(false);
     }else{
       callback(true);
+      socket.join(data);
       nicknames.push(data);
       socket.nickname = data;
       io.sockets.emit('nicknames', nicknames);
-      Mensaje.find({}, function (err, docs) {
-        historial=docs;
-        io.sockets.emit('historial', historial);
-      });
-
+      cargaHistorialChat('Chat');
     }
-
   });
 
-  //Cuando se envia un mensaje
-  socket.on('user mensaje', function(data) {
+  socket.on('chat', function () {
+    cargaHistorialChat('Chat');
+  });
 
-    io.sockets.emit('user mensaje', {
-      nick: socket.nickname,
-      message: data
+  //Cuando se entra a un room
+  socket.on('private', function (data) {
+    cargaHistorial(data,socket.nickname);
+  });
+
+  //Fincion cargar historial
+  function cargaHistorialChat(room){
+    //socket.join(data.user); // We are using room of socket io
+    Mensaje.find({ to: room }, function (err, docs) {
+      //historial=docs;
+      //io.sockets.emit('historial', historial);
+      io.sockets.in(socket.nickname).emit('historial', {
+        room: room,
+        mensajes: docs
+      });
     });
+    //io.sockets.in(data).emit('private', {from:socket.nickname, msj: 'hello'});
+  }
+  //Fincion cargar historial
+  function cargaHistorial(room,from){
+    //socket.join(data.user); // We are using room of socket io
+    //Mensaje.find({ to:room, from:from }, function (err, docs) {
+    Mensaje.find( { $or:[ { to:room, from:from }, { to:from, from:room} ] }, function (err, docs) {
+      //historial=docs;
+      //io.sockets.emit('historial', historial);
+      io.sockets.in(from).emit('historial', {
+        room: room,
+        mensajes: docs
+      });
+    });
+    //io.sockets.in(data).emit('private', {from:socket.nickname, msj: 'hello'});
+  }
+
+  //Cuando se recibe un mensaje
+  socket.on('mensaje', function(data) {
+    //io.sockets.socket(data.room).emit('mensaje', {
+    if(data.room == 'Chat'){
+      io.sockets.emit('mensaje', {
+        to: data.room,
+        from: socket.nickname,
+        msj: data.msj,
+        fecha: data.fecha
+      });
+    }else{
+      io.sockets.in(data.room).emit('mensaje', {
+        to: data.room,
+        from: socket.nickname,
+        msj: data.msj,
+        fecha: data.fecha
+      });
+    }
+
     //create new model
-    var mensajes = new Mensaje({nick: socket.nickname, message: data, fecha: today});
+    var mensajes = new Mensaje({
+      to: data.room,
+      from: socket.nickname,
+      msj: data.msj,
+      fecha: data.fecha
+    });
     //save model to MongoDB
     mensajes.save(function (err) {
       if (err) {
         return err;
       }
       else {
-        console.log("Post saved");
+        console.log("mensaje guardado");
       }
     });
   });
 
-  //Cuando salen de la app
-  socket.on('disconnect', function() {
 
+  //Cuando sale un usuario de la app
+  socket.on('disconnect', function() {
     if(!socket.nickname) return;
     nicknames.splice(nicknames.indexOf(socket.nickname), 1);
     socket.broadcast.emit('nicknames', nicknames);
-
   });
 
 });

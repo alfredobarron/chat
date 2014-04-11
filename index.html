@@ -19,12 +19,12 @@
 		<header class="hidden">
 			<div class="container">
 			<h3>
-				<a href="#"><span class="glyphicon glyphicon-comment"></span></a>
-
+				<a href="#" id="btn-chat"><span class="glyphicon glyphicon-comment"></span></a>
+				<span id="room">Chat</span>
 				<div class="btn-group pull-right">
-					<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+					<button type="button" class="btn btn-default dropdown-toggle" id="btn-users" data-toggle="dropdown">
 						<span class="glyphicon glyphicon-user"></span>
-						<span class="badge" id="count"></span>
+						<span class="label label-default" id="count"></span>
 					</button>
 					<ul class="dropdown-menu" id="nicknames"></ul>
 				</div>
@@ -81,11 +81,26 @@
 				}
 			});
 
+			$('#btn-chat').click(function(e){
+				e.preventDefault();
+				socket.emit('chat');
+			});
+
+			$('#btn-users').click(function(e){
+				e.preventDefault();
+				$('#count').removeClass('label-info');
+			});
+
 			$('#btn-mensaje').click(function(e){
 				e.preventDefault();
-				socket.emit('user mensaje', $('#mensaje').val());
+				socket.emit('mensaje', {room:$('#room').text(), msj:$('#mensaje').val(), fecha:today});
 				$('#mensaje').val('').focus();
 				//$('#mensajes').animate({scrollTop: $( "p:last" ).offset().top - 0}, 800);
+			});
+
+			$('#nicknames').on('click', 'a', function(e){
+				e.preventDefault();
+				socket.emit('private', $(this).text());
 			});
 
 			socket.on('nicknames',function(data){
@@ -96,17 +111,33 @@
 				$('#count').html(data.length);
 			});
 
+			socket.on('mensaje',function(data){
+				if(data.to == 'Chat'){
+					$('#mensajes').append('<div><small class="text-muted"><b>' + data.from + '</b> - <em> ' + data.fecha + '</em></small><p>' + data.msj + '</p></div>');
+					$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
+				}else{
+					if(data.from == $('#room').text()){
+					$('#mensajes').append('<div><small class="text-muted"><b>' + data.from + '</b> - <em> ' + data.fecha + '</em></small><p>' + data.msj + '</p></div>');
+					$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
+					}else{
+						$('#count').addClass('label-info');
+						$('#nicknames li').id(data.from).addClass('active');
+					}
+				}
+			});
+
 			socket.on('historial',function(data){
-				$.each(data,function(k,v){
-					$('#mensajes').append('<div><small class="text-muted"><b>' + v.nick + ' </b> - <em> ' + v.fecha + '</em></small><p>' + v.message + '</p></div>');
+				$('#mensajes').empty();
+				$('#room').text(data.room);
+				$.each(data.mensajes,function(k,v){
+					$('#mensajes').append('<div><small class="text-muted"><b>' + v.from + ' </b> - <em> ' + v.fecha + '</em></small><p>' + v.msj + '</p></div>');
 				});
 				$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
 			});
 
-			socket.on('user mensaje',function(data){
-				$('#mensajes').append('<div><small class="text-muted"><b>' + data.nick + '</b> - <em> ' + today + '</em></small><p>' + data.message + '</p></div>');
-				$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
-			});
+			// socket.on("private", function(data) {
+			//     alert('From: ' + data.from + ' mensaje: '+ data.msj);
+			// });
 
 			var today = new Date();
 			var dd = today.getDate();
