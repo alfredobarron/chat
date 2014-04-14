@@ -1,144 +1,181 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" class="no-js">
 	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Chat</title>
-		<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-		<link rel="stylesheet" href="/styles.css">
-		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-		<!--[if lt IE 9]>
-		<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-		<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-		<![endif]-->
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>OldChat</title>
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<meta name="author" content="Alfredo Barron" />
+		<link rel="shortcut icon" href="../favicon.ico">
+		<link rel="stylesheet" type="text/css" href="css/normalize.css" />
+		<link rel="stylesheet" type="text/css" href="css/component.css" />
+		<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+		<script src="js/modernizr.custom.js"></script>
 	</head>
 	<body>
+		<div class="container">
 
-		<header class="hidden">
-			<div class="container">
-			<h3>
-				<a href="#" id="btn-chat"><span class="glyphicon glyphicon-comment"></span></a>
-				<span id="room">Chat</span>
-				<div class="btn-group pull-right">
-					<button type="button" class="btn btn-default dropdown-toggle" id="btn-users" data-toggle="dropdown">
-						<span class="glyphicon glyphicon-user"></span>
-						<span class="label label-default" id="count"></span>
-					</button>
-					<ul class="dropdown-menu" id="nicknames"></ul>
-				</div>
-			</h3>
-			</div>
-		</header>
-
-		<section>
-			<form id="form-nickname">
-			<div class="container">
-				<h1 class="text-center"><span class="glyphicon glyphicon-comment"></span></h1>
-				<div class="form-group">
-					<input type="text" class="form-control input-lg" id="nickname" placeholder="Nickname" autofocus>
-				</div>
-				<button class="btn btn-primary btn-lg btn-block" id="btn-nickname">Entrar</button>
-			</div>
+			<form class="login" id="form-nickname">
+				<div><i class="fa fa-stack-exchange"></i></div>
+				<input type="text" id="txt-nickname" placeholder="Nickname" autofocus>
+				<button id="btn-nickname">Entrar</button>
 			</form>
 
-			<div class="hidden" id="mensajes"></div>
-		</section>
+			<div class="hidden" id="chat">
+				<ul id="gn-menu" class="gn-menu-main">
+					<li class="gn-trigger">
+						<a class="gn-icon gn-icon-menu" id="btn-users"><span>Usuarios</span></a>
+						<nav class="gn-menu-wrapper">
+							<div class="gn-scroller">
+								<ul class="gn-menu" id="list-nicknames">
+									<li class="gn-search-item"><input placeholder="Search" type="search" class="gn-search"><a class="gn-icon gn-icon-search"><span>Buscar</span></a></li>
+									<li><a href="#" class="gn-icon gn-icon-archive"><p class="hidden">Chat</p><div id="countUsers" class="countUsers hidden"></div></a></li>
+								</ul>
+							</div><!-- /gn-scroller -->
+						</nav>
+						<span class="notificaciones hidden" id="notificaciones">&nbsp&nbsp</span>
+					</li>
+					<li><a href="#" id="room">OldChat</a></li>
+					<li><a class="gn-icon gn-icon-cog" href="#" id="user"><span></span></a></li>
+				</ul>
+				<ul class="footer">
+					<form id="form-mensaje">
+					<li><input type="text" id="txt-mensaje" placeholder="Escribe un mensaje"></li>
+					<li><button id="btn-mensaje"><span class="fa fa-rocket"></span></button></li>
+					</form>
+				</ul>
+				<section>
+					<div class="scroller">
+					<ul class="mensajes" id="mensajes"></ul>
+					</div>
+				</section>
+			</div>
 
-		<footer>
-			<form class="hidden" id="form-mensaje">
-				<div class="input-group">
-					<input type="text" class="form-control input-lg" id="mensaje" placeholder="Escribe un mensaje">
-						<span class="input-group-btn">
-							<button class="btn btn-primary input-lg" id="btn-mensaje"><span class="glyphicon glyphicon-send"></span></button>
-						</span>
-				</div><!-- /input-group -->
-			</form>
-		</footer>
-
+		</div><!-- /container -->
 		<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-		<script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+		<script src="js/classie.js"></script>
+		<script src="js/gnmenu.js"></script>
+		<!-- <script src="smoke/js/smoke.js"></script> -->
 		<script src="/socket.io/socket.io.js"></script>
+		<script>
+			new gnMenu( document.getElementById( 'gn-menu' ) );
+		</script>
 		<script>
 			var socket = io.connect();
 
 			$('#btn-nickname').click(function(e){
 				e.preventDefault();
-				var btn = $(this);
-				if($('#nickname').val()!==''){
-					btn.button('loading');
-					socket.emit('nickname', $('#nickname').val(), function(data){
+				//var btn = $(this);
+				if($('#txt-nickname').val()!==''){
+					//btn.button('loading');
+					socket.emit('nickname', $('#txt-nickname').val(), function(data){
 						if(data){
+							//Se agrega el nombre de usuario en el div user
+							$('#user span').text($('#txt-nickname').val());
+							//Se limpia el formulario y se oculta
+							$('#txt-nickname').val('');
 							$('#form-nickname').addClass('hidden');
-							$('header, #mensajes, #form-mensaje').removeClass('hidden');
-							$('#form-mensaje #mensaje').focus();
+							//Se muestra el chat y se agrega el focus al input de mensaje
+							$('#chat').removeClass('hidden');
+							$('#txt-mensaje').focus();
+							//Se cargan los usuarios en el list-nicknames
+							$.each(data.nicknames, function(k,v){
+								if($('#user').text() != v){
+									$('#list-nicknames').append('<li id="' + v + '"><a href="#" class="gn-icon gn-icon-pictures"><p class="hidden">' + v + '</p><div class="notificacion hidden">&nbsp</div></a></li>');
+								}
+							});
+							//Se carga el numero de usuarios
+							$( '#countUsers' ).text('(' + (data.count - 1) + ')');
 						}else{
-							$('#form-nickname .container').append('<div class="alert alert-warning">El nickname ya esta en uso</div>');
+							$('#txt-nickname').val('');
+							$('#txt-nickname').focus();
+							$('#txt-nickname').attr('placeholder','El nickname ya esta en uso');
 						}
-						btn.button('reset');
+						//btn.button('reset');
 					});
+				}else{
+					$('#txt-nickname').focus();
+					$('#txt-nickname').attr('placeholder','Ingresa un nombre');
 				}
-			});
-
-			$('#btn-chat').click(function(e){
-				e.preventDefault();
-				socket.emit('chat');
-			});
-
-			$('#btn-users').click(function(e){
-				e.preventDefault();
-				$('#count').removeClass('label-info');
 			});
 
 			$('#btn-mensaje').click(function(e){
 				e.preventDefault();
-				socket.emit('mensaje', {room:$('#room').text(), msj:$('#mensaje').val(), fecha:today});
-				$('#mensaje').val('').focus();
-				//$('#mensajes').animate({scrollTop: $( "p:last" ).offset().top - 0}, 800);
-			});
-
-			$('#nicknames').on('click', 'a', function(e){
-				e.preventDefault();
-				socket.emit('private', $(this).text());
-			});
-
-			socket.on('nicknames',function(data){
-				$('#nicknames').empty();
-				$.each(data, function(k,v){
-					$('#nicknames').append('<li><a href="#">' + v + '</a></li>');
-				});
-				$('#count').html(data.length);
-			});
-
-			socket.on('mensaje',function(data){
-				if(data.to == 'Chat'){
-					$('#mensajes').append('<div><small class="text-muted"><b>' + data.from + '</b> - <em> ' + data.fecha + '</em></small><p>' + data.msj + '</p></div>');
-					$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
-				}else{
-					if(data.from == $('#room').text()){
-					$('#mensajes').append('<div><small class="text-muted"><b>' + data.from + '</b> - <em> ' + data.fecha + '</em></small><p>' + data.msj + '</p></div>');
-					$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
-					}else{
-						$('#count').addClass('label-info');
-						$('#nicknames li').id(data.from).addClass('active');
-					}
+				if($('#txt-mensaje').val() !== ''){
+					//Se inserta el mensaje en tu pantalla
+					llena($('#user span').text(),today,$('#txt-mensaje').val());
+					scroll();
+					//Se emite el mensaje al room adecuado
+					socket.emit('mensaje', {room:$('#room').text(), msj:$('#txt-mensaje').val(), fecha:today});
+					$('#txt-mensaje').val('').focus();
 				}
 			});
 
+			$('#list-nicknames').on('click', 'a', function(e){
+				e.preventDefault();
+				var room = $(this).children('p').text();
+				var nav = $(this).parents('nav').removeClass('gn-open-all');
+				$(nav).siblings('a').removeClass('gn-selected');
+				$('#txt-mensaje').val('').focus();
+				//$('#btn-mensaje').click();
+				socket.emit('private', room);
+				$('#notificaciones').addClass('hidden');
+				$(this).children('.notificacion').addClass('hidden');
+			});
+
+			$('#btn-users').click(function(e){
+				e.preventDefault();
+				$('#notificaciones').addClass('hidden');
+			});
+
+			socket.on('nicknames',function(data){
+				$('#list-nicknames').append('<li id="' + data.nick + '"><a href="#" class="gn-icon gn-icon-pictures"><p class="hidden">' + data.nick + '</p><div class="notificacion hidden">&nbsp&nbsp</div></a></li>');
+				$( '#countUsers' ).text('(' + (data.count - 1) + ')');
+			});
+
+			socket.on('nicknamesLogout',function(data){
+				$('#list-nicknames #'+ data.nick).remove();
+				$( '#countUsers' ).text('(' + (data.count - 1) + ')');
+			});
+
 			socket.on('historial',function(data){
+				console.log('historial');
+				console.log(data);
 				$('#mensajes').empty();
 				$('#room').text(data.room);
 				$.each(data.mensajes,function(k,v){
-					$('#mensajes').append('<div><small class="text-muted"><b>' + v.from + ' </b> - <em> ' + v.fecha + '</em></small><p>' + v.msj + '</p></div>');
+					llena(v.from, v.fecha, v.msj);
 				});
-				$("#mensajes").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
+				scroll();
 			});
 
-			// socket.on("private", function(data) {
-			//     alert('From: ' + data.from + ' mensaje: '+ data.msj);
-			// });
+			socket.on('mensaje',function(data){
+				console.log('mensajes');
+				console.log(data);
+				if(data.to == 'Chat'){
+					llena(data.from, data.fecha, data.msj);
+					scroll();
+				}else if(data.from == $('#room').text()){
+					llena(data.from, data.fecha, data.msj);
+					scroll();
+				}else{
+					$('#notificaciones').removeClass('hidden');
+					$('#list-nicknames #'+data.from+' .notificacion').removeClass('hidden');
+				}
+			});
 
+
+			function llena(from, fecha, msj){
+				$('#mensajes').append('<li><p>' + from + ' - <em> ' + fecha + '</em></p><span>' + msj + '</span></li>');
+			}
+
+			function scroll(){
+				$(".scroller").animate({scrollTop: $("#mensajes")[0].scrollHeight}, 800);
+			}
+
+			//FUNCTION FECHA
 			var today = new Date();
 			var dd = today.getDate();
 			var mm = today.getMonth(); //January is 0!
@@ -150,7 +187,6 @@
 			//if(mm<10){mm='0'+mm}
 			var monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 			var today = dd+'.'+monthNames[mm]+'.'+yyyy+' '+h+':'+min;
-
 		</script>
 	</body>
 </html>

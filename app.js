@@ -56,12 +56,16 @@ io.sockets.on('connection', function (socket) {
     if(nicknames.indexOf(data) != -1){
       callback(false);
     }else{
-      callback(true);
+      socket.nickname = data;
       socket.join(data);
       nicknames.push(data);
-      socket.nickname = data;
-      io.sockets.emit('nicknames', nicknames);
+      //Se carga el historial de mensajes
       cargaHistorialChat('Chat');
+      //Al entrar se les notifica a todos menos a mi
+      socket.broadcast.emit('nicknames', {nick: data, count: nicknames.length});
+      //Se carga la lista de usuarios
+      callback({nicknames: nicknames, count: nicknames.length});
+
     }
   });
 
@@ -76,37 +80,39 @@ io.sockets.on('connection', function (socket) {
 
   //Fincion cargar historial
   function cargaHistorialChat(room){
-    //socket.join(data.user); // We are using room of socket io
     Mensaje.find({ to: room }, function (err, docs) {
-      //historial=docs;
-      //io.sockets.emit('historial', historial);
-      io.sockets.in(socket.nickname).emit('historial', {
+      socket.in(socket.nickname).emit('historial', {
+      //socket.emit(socket.nickname).emit('historial', {
         room: room,
         mensajes: docs
       });
     });
-    //io.sockets.in(data).emit('private', {from:socket.nickname, msj: 'hello'});
   }
   //Fincion cargar historial
   function cargaHistorial(room,from){
-    //socket.join(data.user); // We are using room of socket io
-    //Mensaje.find({ to:room, from:from }, function (err, docs) {
-    Mensaje.find( { $or:[ { to:room, from:from }, { to:from, from:room} ] }, function (err, docs) {
-      //historial=docs;
-      //io.sockets.emit('historial', historial);
-      io.sockets.in(from).emit('historial', {
-        room: room,
-        mensajes: docs
+    if(room == 'Chat'){
+      Mensaje.find({ to: room }, function (err, docs) {
+        socket.in(from).emit('historial', {
+          room: room,
+          mensajes: docs
+        });
       });
-    });
-    //io.sockets.in(data).emit('private', {from:socket.nickname, msj: 'hello'});
+    }else{
+      Mensaje.find( { $or:[ { to:room, from:from }, { to:from, from:room} ] }, function (err, docs) {
+        socket.in(from).emit('historial', {
+          room: room,
+          mensajes: docs
+        });
+      });
+    }
+
   }
 
   //Cuando se recibe un mensaje
   socket.on('mensaje', function(data) {
     //io.sockets.socket(data.room).emit('mensaje', {
     if(data.room == 'Chat'){
-      io.sockets.emit('mensaje', {
+      socket.broadcast.emit('mensaje', {
         to: data.room,
         from: socket.nickname,
         msj: data.msj,
@@ -128,6 +134,7 @@ io.sockets.on('connection', function (socket) {
       msj: data.msj,
       fecha: data.fecha
     });
+
     //save model to MongoDB
     mensajes.save(function (err) {
       if (err) {
@@ -144,7 +151,7 @@ io.sockets.on('connection', function (socket) {
   socket.on('disconnect', function() {
     if(!socket.nickname) return;
     nicknames.splice(nicknames.indexOf(socket.nickname), 1);
-    socket.broadcast.emit('nicknames', nicknames);
+    socket.broadcast.emit('nicknamesLogout', {nick: socket.nickname, count: nicknames.length});
   });
 
 });
